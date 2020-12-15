@@ -1,0 +1,61 @@
+{
+	"$id": "http://parkmyst.github.io/plugins/schemas/repository.schema.json",
+	"$schema": "http://json-schema.org/draft-07/schema",
+    "required": ["name", "maintainer", "plugins"],
+	"title": "Repository",
+	"type": "object",
+	"properties": {
+        "$schema": {            
+			"type": "string"
+        },
+		"name": {
+			"$id": "#/properties/name",
+			"type": "string",
+			"title": "Name",
+            "description": "The name of the repository.",
+            "pattern": "^[a-zA-Z1-9 ]{1,30}$",
+			"examples": ["Your Repository Name"]
+		},
+		"lastUpdate": {
+			"$id": "#/properties/lastUpdate",
+			"type": "string",
+			"title": "Last update",
+            "description": "The timestamp of last plugin changes. ParkMyst might use this for caching",
+            "format": "date-time",
+			"examples": ["2018-11-13T20:20:39+00:00"]
+		},
+		"maintainer": {
+			"$id": "#/properties/maintainer",
+			"type": "object",
+            "title": "Maintainer",
+            "required": ["name", "address"],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/maintainer/name",
+                    "type": "string",
+                    "title": "Name",
+                    "description": "The name of the maintainer",
+                    "pattern": "^[a-zA-Z1-9 ]{1,30}$",
+                    "examples": ["John Doe"]
+                },
+                "address": {
+                    "$id": "#/properties/maintainer/name",
+                    "type": "string",
+                    "title": "Address",
+                    "description": "The email address of the maintainer",
+                    "format": "email",
+                    "examples": ["john@doe"]
+                }
+            }
+		},
+		"plugins": {
+			"$id": "#/properties/plugins",
+			"type": "array",
+			"title": "Plugins",
+            "description": "A list of plugins that this repository contains.",
+            "items": {
+                "$ref": "plugin.schema.json"
+            }
+		}
+	}
+}

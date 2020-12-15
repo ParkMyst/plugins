@@ -1,0 +1,73 @@
+{
+    "$schema": "http://parkmyst.github.io/plugins/schemas/repository.schema.json",
+    "name": "Beta ParkMyst Repository",
+    "maintainer": {
+        "name": "ParkMyst",
+        "address": "hazizzvelunk@gmail.com"
+    },
+    "plugins": [
+        {
+            "name": "LeafletPlugin",
+            "version": "0.0.1",
+            "description": "This is a map component with javascript based leaflet",
+            "library": "parkmyst-1.ts",
+            "path": "./LeafletPlugin@0.0.1.ts"
+        },
+        {
+            "name": "LocationPlugin",
+            "version": "0.0.1",
+            "description": "This is a map component with client build-in leaflet",
+            "library": "parkmyst-1.ts",
+            "path": "./LocationPlugin@0.0.1.ts"
+        },
+        {
+            "name": "LogicGatesPlugin",
+            "version": "0.0.1",
+            "description": "This plugin provides components for logical gates",
+            "library": "parkmyst-1.ts",
+            "path": "./LogicGatesPlugin@0.0.1.ts"
+        },
+        {
+            "name": "ManagerPlugin",
+            "version": "0.0.1",
+            "description": "This plugin provides components for changing component life-cycles",
+            "library": "parkmyst-1.ts",
+            "path": "./ManagerPlugin@0.0.1.ts"
+        },
+        {
+            "name": "MessagePlugin",
+            "version": "0.0.1",
+            "description": "This is contains components for showing messages (text or image)",
+            "library": "parkmyst-1.ts",
+            "path": "./MessagePlugin@0.0.1.ts"
+        },
+        {
+            "name": "PointPlugin",
+            "version": "0.0.1",
+            "description": "This is point system plugin",
+            "library": "parkmyst-1.ts",
+            "path": "./PointPlugin@0.0.1.ts"
+        },
+        {
+            "name": "QrCodePlugin",
+            "version": "0.0.1",
+            "description": "This is a qr code based component system",
+            "library": "parkmyst-1.ts",
+            "path": "./QrCodePlugin@0.0.1.ts"
+        },
+        {
+            "name": "QuestionPlugin",
+            "version": "0.0.1",
+            "description": "This plugin provides components for questions",
+            "library": "parkmyst-1.ts",
+            "path": "./QuestionPlugin@0.0.1.ts"
+        },
+        {
+            "name": "StationPlugin",
+            "version": "0.0.1",
+            "description": "This contains components for making an approval station",
+            "library": "parkmyst-1.ts",
+            "path": "./StationPlugin@0.0.1.ts"
+        }
+    ]
+}
