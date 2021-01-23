@@ -13,6 +13,8 @@ import {
     PlayerPermission,
     registerComponent,
     removeFeed,
+    subscribeToEvent,
+    unsubscribeFromEvent,
     updateFeed,
     useState
 } from "./library/parkmyst-1";
@@ -22,8 +24,7 @@ interface LocationData extends ComponentData {
         latitude: number,
         longitude: number
     }
-    sensitivity: number,
-    nextComponent: number
+    sensitivity: number
 }
 
 interface LocationContext {
@@ -68,18 +69,9 @@ export class Location extends Component<LocationData> {
         "additionalProperties": false,
         "required": [
             "coordinates",
-            "sensitivity",
-            "nextComponent"
+            "sensitivity"
         ],
         "definitions": {
-            "component": {
-                "$id": "#/definitions/component",
-                "type": "number",
-                "title": "Next component",
-                "default": -1,
-                "minimum": -1,
-                "format": "parkmyst-id"
-            },
             "location": {
                 "$id": "#/definitions/location",
                 "type": "object",
@@ -110,8 +102,7 @@ export class Location extends Component<LocationData> {
                 "title": "Proximity to location (km)",
                 "default": 0.1,
                 "minimum": 0.0
-            },
-            "nextComponent": { "$ref": "#/definitions/component" }
+            }
         }
     };
 
@@ -149,11 +140,16 @@ export class Location extends Component<LocationData> {
         }
     };
 
+    constructor() {
+        super();
+        this.registerSafeEventListeners(BuiltInEvents.LocationUpdated, this.handleLocationUpdated, isLocationUpdatedEvent);
+    }
+
     componentStartEvent() {
         const component = getComponentInformation<LocationData>();
         const [, setContext] = useState<LocationContext>();
 
-        this.registerSafeEventListeners(BuiltInEvents.LocationUpdated, this.handleLocationUpdated, isLocationUpdatedEvent);
+        subscribeToEvent(BuiltInEvents.LocationUpdated)
         const context: LocationContext = {
             feedId: createFeed("locationHint", {
                 latitude: component.data.coordinates.latitude,
@@ -201,14 +197,14 @@ export class Location extends Component<LocationData> {
     }
 
     componentCleanUp() {
-        this.unregisterEventListeners(BuiltInEvents.LocationUpdated);
+        unsubscribeFromEvent(BuiltInEvents.LocationUpdated)
         const [ctx,] = useState<LocationContext>();
         removeFeed(ctx.feedId);
     }
 
     componentCompleted() {
         const component = getComponentInformation<LocationData>();
-        dispatchNextComponentEvent(component.data.nextComponent)
+        dispatchNextComponentEvent(component.nextComponents)
     }
 
 }

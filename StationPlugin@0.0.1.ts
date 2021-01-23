@@ -1,8 +1,4 @@
-import { ComponentData, Component, JSONSchema7, OutputTemplates, useState, ComponentEvent, registerComponent, PlayerPermission, createFeed, dispatchNextComponentEvent, removeFeed, Sender, isPlayerSender, isPlayerController, dispatchCompleted, isPlayerAdmin } from "./library/parkmyst-1";
-
-interface StationData extends ComponentData {
-    nextComponent: number,
-}
+import { Component, JSONSchema7, OutputTemplates, useState, ComponentEvent, registerComponent, PlayerPermission, createFeed, dispatchNextComponentEvent, removeFeed, Sender, isPlayerSender, isPlayerController, dispatchCompleted, isPlayerAdmin, subscribeToEvent, unsubscribeFromEvent } from "./library/parkmyst-1";
 
 interface StationState {
     waitingFeedId: string,
@@ -19,33 +15,14 @@ function isStationEvent(event: ComponentEvent): event is StationEvent {
         (!isPlayerSender(event.sender) || isPlayerController(event.sender) || isPlayerAdmin(event.sender));
 }
 
-export class StationComponent extends Component<StationData> {
+export class StationComponent extends Component {
 
     schemaComponentData: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
-        "required": [
-            "nextComponent"
-        ],
-        "definitions": {
-            "component": {
-                "$id": "#/definitions/component",
-                "type": "number",
-                "title": "Next component",
-                "default": -1,
-                "minimum": -1,
-                "format": "parkmyst-id"
-            }
-        },
-        "properties": {
-            "nextComponent": { "$ref": "#/definitions/component" }
-        }
+        "properties": {}
     };
-
-    gameStartEvent() {
-        this.registerSafeEventListeners<StationEvent>("stationCompleted", this.handleStationEvent, isStationEvent);
-    }
 
     componentOutputTemplate: OutputTemplates = {
         stationUserWaiting: {
@@ -69,26 +46,33 @@ export class StationComponent extends Component<StationData> {
         }
     };
 
+    constructor() {
+        super();
+        this.registerSafeEventListeners<StationEvent>("stationCompleted", this.handleStationEvent, isStationEvent);
+    }
+
     componentStartEvent() {
         const [, setState] = useState<StationState>();
         setState({
             waitingFeedId: createFeed("stationUserWaiting",  {}),
             controlFeedId: createFeed("stationController", {}, PlayerPermission.Controller)
         })
+        subscribeToEvent("stationCompleted");
     }
 
     componentCleanUp() {
         const [state] = useState<StationState>();
         removeFeed(state.controlFeedId);
         removeFeed(state.waitingFeedId);
+        unsubscribeFromEvent("stationCompleted");
     }
 
     componentCompleted() {
         const information = this.getComponentInformation();
-        dispatchNextComponentEvent(information.data.nextComponent);
+        dispatchNextComponentEvent(information.nextComponents);
     }
 
-    handleStationEvent(event: StationEvent) {
+    handleStationEvent() {
         dispatchCompleted();
     }
 

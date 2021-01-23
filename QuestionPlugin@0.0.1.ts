@@ -11,6 +11,8 @@ import {
     PlayerPermission,
     registerComponent,
     removeFeed,
+    subscribeToEvent,
+    unsubscribeFromEvent,
     updateFeed,
     useState
 } from "./library/parkmyst-1";
@@ -19,7 +21,6 @@ interface QuestionData extends ComponentData {
     question: string
     answer: string,
     matchPercentage: number
-    nextComponent: number
     onFail: number
 }
 
@@ -87,8 +88,7 @@ export class SimpleQuestion extends Component<QuestionData> {
             "question",
             "answer",
             "matchPercentage",
-            "onFail",
-            "nextComponent"
+            "onFail"
         ],
         "definitions": {
             "component": {
@@ -124,8 +124,7 @@ export class SimpleQuestion extends Component<QuestionData> {
             "onFail": {
                 "$ref": "#/definitions/component",
                 "title": "Component on fail",
-            },
-            "nextComponent": { "$ref": "#/definitions/component" }
+            }
         }
     };
 
@@ -146,8 +145,13 @@ export class SimpleQuestion extends Component<QuestionData> {
         }
     };
 
-    componentStartEvent() {
+    constructor() {
+        super();
         this.registerSafeEventListeners("simpleAnswer", this.handleSimpleAnswer, isAnswerEvent);
+    }
+
+    componentStartEvent() {
+        subscribeToEvent("simpleAnswer");
         const component = this.getComponentInformation();
         const [, setContext] = useState<SimpleQuestionContext>();
 
@@ -162,13 +166,13 @@ export class SimpleQuestion extends Component<QuestionData> {
 
     componentCleanUp() {
         const [ctx,] = useState<SimpleQuestionContext>();
-        this.unregisterEventListeners("simpleAnswer")
+        unsubscribeFromEvent("simpleAnswer");
         removeFeed(ctx.feedId);
     }
 
     componentCompleted() {
         const data = this.getComponentInformation();
-        dispatchNextComponentEvent(data.data.nextComponent);
+        dispatchNextComponentEvent(data.nextComponents);
     }
 
     handleSimpleAnswer = (event: AnswerEvent) => {
@@ -202,7 +206,6 @@ export class CommentQuestion extends Component<QuestionData> {
             "answer",
             "matchPercentage",
             "onFail",
-            "nextComponent"
         ],
         "definitions": {
             "component": {
@@ -238,9 +241,6 @@ export class CommentQuestion extends Component<QuestionData> {
             "onFail": {
                 "$ref": "#/definitions/component",
                 "title": "Component on fail"
-            },
-            "nextComponent": {
-                "$ref": "#/definitions/component"
             }
         }
     };
@@ -279,8 +279,13 @@ export class CommentQuestion extends Component<QuestionData> {
         }
     };
 
-    componentStartEvent() {
+    constructor() {
+        super();        
         this.registerSafeEventListeners("simpleAnswer", this.handleAnswer, isAnswerEvent);
+    }
+
+    componentStartEvent() {
+        subscribeToEvent("simpleAnswer")
         const component = this.getComponentInformation();
         const [, setContext] = useState<CommentQuestionContext>();
 
@@ -296,14 +301,14 @@ export class CommentQuestion extends Component<QuestionData> {
     }
 
     componentCleanUp() {
-        this.unregisterEventListeners("simpleAnswer");
+        unsubscribeFromEvent("simpleAnswer");
         const [ctx,] = useState<CommentQuestionContext>();
         removeFeed(ctx.feedId);
     }
 
     componentCompleted() {
         const data = this.getComponentInformation();
-        dispatchNextComponentEvent(data.data.nextComponent);
+        dispatchNextComponentEvent(data.nextComponents);
     }
 
     handleAnswer = (event: AnswerEvent) => {

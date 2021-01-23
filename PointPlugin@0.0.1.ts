@@ -87,6 +87,11 @@ export class PointInitializer extends Component<PointInitializerData> {
 
     componentOutputTemplate = {};
 
+    constructor() {
+        super();
+        this.registerSafeEventListeners("pointEvent", this.handlePointEvent, isPointEvent);
+    }
+
     componentStartEvent(): void {
         const component = getComponentInformation<PointInitializerData>();
         const [context, setContext] = useSharedState<PointGlobalContext>();
@@ -96,11 +101,11 @@ export class PointInitializer extends Component<PointInitializerData> {
             point: 0
         };
         setContext(context);
-        this.registerSafeEventListeners("pointEvent", this.handlePointEvent, isPointEvent);
+        subscribeToEvent("pointEvent");
     }
 
     componentCleanUp() {
-        this.unregisterEventListeners("pointEvent");
+        unsubscribeFromEvent("pointEvent");
     }
 
     componentCompleted() {
@@ -128,9 +133,8 @@ registerComponent(new PointInitializer());
 
 interface PointChangerData extends ComponentData {
     counterId: string,
-    operation: "add" | "remove"
-    amount: number,
-    nextComponent: number
+    operation: "add" | "remove",
+    amount: number
 }
 
 export class PointChanger extends Component<PointChangerData> {
@@ -141,19 +145,8 @@ export class PointChanger extends Component<PointChangerData> {
         "required": [
             "counterId",
             "operation",
-            "amount",
-            "nextComponent"
+            "amount"
         ],
-        "definitions": {
-            "component": {
-                "$id": "#/definitions/component",
-                "type": "number",
-                "title": "Next component",
-                "default": -1,
-                "minimum": -1,
-                "format": "parkmyst-id"
-            }
-        },
         "properties": {
             "counterId": {
                 "$id": "#/properties/counterId",
@@ -175,8 +168,7 @@ export class PointChanger extends Component<PointChangerData> {
                 "default": 1.0,
                 "minimum": 0.0,
                 "multipleOf": 1.0
-            },
-            "nextComponent": { "$ref": "#/definitions/component" }
+            }
         }
     };
 
@@ -197,7 +189,7 @@ export class PointChanger extends Component<PointChangerData> {
 
     componentCompleted() {
         const component = getComponentInformation<PointChangerData>();
-        dispatchNextComponentEvent(component.data.nextComponent);
+        dispatchNextComponentEvent(component.nextComponents);
     }
 
     componentCleanUp() {
@@ -209,8 +201,7 @@ export class PointChanger extends Component<PointChangerData> {
 registerComponent(new PointChanger());
 
 interface PointResultData extends ComponentData {
-    counterId: string,
-    nextComponent: number
+    counterId: string
 }
 
 interface FeedContext {
@@ -223,27 +214,15 @@ export class PointResult extends Component<PointResultData> {
         "type": "object",
         "additionalProperties": false,
         "required": [
-            "counterId",
-            "nextComponent"
+            "counterId"
         ],
-        "definitions": {
-            "component": {
-                "$id": "#/definitions/component",
-                "type": "number",
-                "title": "Next component",
-                "default": -1,
-                "minimum": -1,
-                "format": "parkmyst-id"
-            }
-        },
         "properties": {
             "counterId": {
                 "$id": "#/properties/counterId",
                 "type": "string",
                 "title": "Id for point system",
                 "default": "1"
-            },
-            "nextComponent": { "$ref": "#/definitions/component" }
+            }
         }
     };
 
@@ -285,7 +264,7 @@ export class PointResult extends Component<PointResultData> {
 
     componentCompleted() {
         const component = getComponentInformation<PointResultData>();
-        dispatchNextComponentEvent(component.data.nextComponent);
+        dispatchNextComponentEvent(component.nextComponents);
     }
 
 }

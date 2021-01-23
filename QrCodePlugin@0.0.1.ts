@@ -8,13 +8,14 @@ import {
     isQRCodeEvent,
     JSONSchema7,
     QRCodeEvent,
-    registerComponent
+    registerComponent,
+    subscribeToEvent,
+    unsubscribeFromEvent
 } from "./library/parkmyst-1";
 
 
 interface QrCodeData extends ComponentData {
     code: string
-    nextComponent: number
 }
 
 export class QrCode extends Component<QrCodeData> {
@@ -25,40 +26,35 @@ export class QrCode extends Component<QrCodeData> {
         "required": [
             "code"
         ],
-        "definitions": {
-            "component": {
-                "$id": "#/definitions/component",
-                "type": "number",
-                "title": "Next component",
-                "default": -1,
-                "minimum": -1,
-                "format": "parkmyst-id"
-            }
-        },
         "properties": {
             "code": {
                 "$id": "#/properties/code",
                 "type": "string",
                 "title": "Code that the user will find",
                 "default": "default-code",
-            },
-            "nextComponent": { "$ref": "#/definitions/component" }
+            }
         }
     };
 
     componentOutputTemplate = {};
 
-    componentStartEvent() {
+    constructor() {
+        super();
         this.registerSafeEventListeners(BuiltInEvents.QrCode, this.handleQrCode, isQRCodeEvent);
+        
+    }
+
+    componentStartEvent() {
+        subscribeToEvent(BuiltInEvents.QrCode);
     }
 
     componentCleanUp() {
-
+        unsubscribeFromEvent(BuiltInEvents.QrCode);
     }
 
     componentCompleted() {
         const component = getComponentInformation<QrCodeData>();
-        dispatchNextComponentEvent(component.data.nextComponent);
+        dispatchNextComponentEvent(component.nextComponents);
     }
 
     handleQrCode(event: QRCodeEvent) {

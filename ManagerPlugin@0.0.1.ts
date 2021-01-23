@@ -14,8 +14,7 @@ import {
 } from "./library/parkmyst-1";
 
 interface FinisherData extends ComponentData {
-    toFinish: number,
-    nextComponent: number
+    toFinish: number
 }
 
 export class Finisher extends Component<FinisherData> {
@@ -25,8 +24,7 @@ export class Finisher extends Component<FinisherData> {
         "type": "object",
         "additionalProperties": false,
         "required": [
-            "toFinish",
-            "nextComponent"
+            "toFinish"
         ],
         "definitions": {
             "component": {
@@ -43,7 +41,6 @@ export class Finisher extends Component<FinisherData> {
                 "$ref": "#/definitions/component",
                 "title": "Component to finish"
             },
-            "nextComponent": {"$ref": "#/definitions/component"}
         }
     };
 
@@ -66,15 +63,14 @@ export class Finisher extends Component<FinisherData> {
 
     componentCompleted() {
         const component = getComponentInformation<FinisherData>();
-        dispatchNextComponentEvent(component.data.nextComponent)
+        dispatchNextComponentEvent(component.nextComponents)
     }
 }
 
 registerComponent(new Finisher());
 
 interface ReseterData extends ComponentData {
-    toReset: number,
-    nextComponent: number
+    toReset: number
 }
 
 export class Reseter extends Component<ReseterData> {
@@ -84,8 +80,7 @@ export class Reseter extends Component<ReseterData> {
         "type": "object",
         "additionalProperties": false,
         "required": [
-            "toReset",
-            "nextComponent"
+            "toReset"
         ],
         "definitions": {
             "component": {
@@ -101,8 +96,7 @@ export class Reseter extends Component<ReseterData> {
             "toReset": {
                 "$ref": "#/definitions/component",
                 "title": "Component to reset"
-            },
-            "nextComponent": {"$ref": "#/definitions/component"}
+            }
         }
     };
 
@@ -125,45 +119,26 @@ export class Reseter extends Component<ReseterData> {
 
     componentCompleted() {
         const component = getComponentInformation<ReseterData>();
-        dispatchNextComponentEvent(component.data.nextComponent)
+        dispatchNextComponentEvent(component.nextComponents)
     }
 }
 
 registerComponent(new Reseter());
 
-interface StartNodeData extends ComponentData {
-    nextComponent: number
-}
-
-export class StartNode extends Component<StartNodeData> {
+export class StartNode extends Component {
     schemaComponentData: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
-        "required": [
-            "nextComponent"
-        ],
-        "definitions": {
-            "component": {
-                "$id": "#/definitions/component",
-                "type": "number",
-                "title": "Next component",
-                "default": -1,
-                "minimum": -1,
-                "format": "parkmyst-id"
-            }
-        },
-        "properties": {
-            "nextComponent": { "$ref": "#/definitions/component" }
-        }
+        "properties": {}
     };
     autoStart = true;
 
     componentOutputTemplate = {};
 
     componentCompleted() {
-        const component = getComponentInformation<StartNodeData>();
-        dispatchNextComponentEvent(component.data.nextComponent)
+        const component = getComponentInformation();
+        dispatchNextComponentEvent(component.nextComponents)
     }
 
     componentCleanUp() {
