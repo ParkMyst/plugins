@@ -4,7 +4,6 @@ import {
     ComponentData,
     dispatchCompleted,
     dispatchNextComponentEvent,
-    getComponentInformation,
     isQRCodeEvent,
     JSONSchema7,
     QRCodeEvent,
@@ -19,7 +18,9 @@ interface QrCodeData extends ComponentData {
 }
 
 export class QrCode extends Component<QrCodeData> {
-    schemaComponentData: JSONSchema7 = {
+    description = "QrCode component allows you to specify a string that should be embedded inside a ParkMyst QR code."
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -36,12 +37,11 @@ export class QrCode extends Component<QrCodeData> {
         }
     };
 
-    componentOutputTemplate = {};
+    outputTemplates = {};
 
     constructor() {
         super();
         this.registerSafeEventListeners(BuiltInEvents.QrCode, this.handleQrCode, isQRCodeEvent);
-        
     }
 
     componentStartEvent() {
@@ -53,12 +53,12 @@ export class QrCode extends Component<QrCodeData> {
     }
 
     componentCompleted() {
-        const component = getComponentInformation<QrCodeData>();
+        const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents);
     }
 
     handleQrCode(event: QRCodeEvent) {
-        const component = getComponentInformation<QrCodeData>();
+        const component = this.getInformation();
         if (component.data.code === event.data.code)
             dispatchCompleted();
     }

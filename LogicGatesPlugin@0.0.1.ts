@@ -2,10 +2,10 @@ import {
     Component,
     ComponentData,
     dispatchNextComponentEvent,
-    getComponentInformation,
     JSONSchema7,
-    registerComponent, subscribeToEvent, updateStatus,
-    useState
+    registerComponent,
+    subscribeToEvent,
+    updateStatus
 } from "./library/parkmyst-1";
 
 interface ThresholdData extends ComponentData {
@@ -15,13 +15,22 @@ interface ThresholdData extends ComponentData {
     onFalse: number
 }
 
-interface ThresholdContext {
+interface ThresholdState {
     activatedAmount: number
 }
 
-export class Threshold extends Component<ThresholdData> {
+export class Threshold extends Component<ThresholdData, ThresholdState> {
 
-    schemaComponentData: JSONSchema7 = {
+    description = "Threshold component gives you a way to count activation times. \n" +
+        "You can specify the activation type: \n" +
+        "- over: Will pass activation forward if it has been activated more than the 'amount' property\n" +
+        "- equals: Will pass activation forward only if it has been activated exactly 'amount' times\n" +
+        "- until: Will pass activation forward until it has been activated 'amount' times\n" +
+        "If this component passes on its activation then onTrue will be fired, otherwise onFalse is fired.";
+
+    useNextComponents: false;
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -71,7 +80,7 @@ export class Threshold extends Component<ThresholdData> {
     doCleanUpOnCompletion = false;
     defaultComponentStartEnabled = false;
 
-    componentOutputTemplate = {};
+    outputTemplates = {};
 
     gameStartEvent() {
         this.componentCleanUp();
@@ -80,7 +89,7 @@ export class Threshold extends Component<ThresholdData> {
     }
 
     componentCleanUp() {
-        const [, setContext] = useState<ThresholdContext>();
+        const [, setContext] = this.useState();
         setContext({
             activatedAmount: 0
         });
@@ -91,8 +100,8 @@ export class Threshold extends Component<ThresholdData> {
     }
 
     componentStartEvent() {
-        const component = getComponentInformation<ThresholdData>();
-        const [context, setContext] = useState<ThresholdContext>();
+        const component = this.getInformation();
+        const [context, setContext] = this.useState();
 
         context.activatedAmount++;
         setContext(context);

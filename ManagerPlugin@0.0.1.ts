@@ -19,7 +19,9 @@ interface FinisherData extends ComponentData {
 
 export class Finisher extends Component<FinisherData> {
 
-    schemaComponentData: JSONSchema7 = {
+    description = "The Finisher component will send a componentEnd lifecycle event (finishes the component) to the component on its 'toFinish' port."
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -45,7 +47,7 @@ export class Finisher extends Component<FinisherData> {
     };
 
 
-    componentOutputTemplate = {};
+    outputTemplates = {};
 
     componentStartEvent() {
         dispatchComponentEvent<ComponentEndEvent>({
@@ -62,7 +64,7 @@ export class Finisher extends Component<FinisherData> {
     }
 
     componentCompleted() {
-        const component = getComponentInformation<FinisherData>();
+        const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents)
     }
 }
@@ -75,7 +77,9 @@ interface ReseterData extends ComponentData {
 
 export class Reseter extends Component<ReseterData> {
 
-    schemaComponentData: JSONSchema7 = {
+    description = "The Rester component will send a componentReset lifecycle event (reverts to original state) to the component on its 'toFinish' port."
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -101,7 +105,7 @@ export class Reseter extends Component<ReseterData> {
     };
 
 
-    componentOutputTemplate = {};
+    outputTemplates = {};
 
     componentStartEvent() {
         dispatchComponentEvent<ComponentResetEvent>({
@@ -118,7 +122,7 @@ export class Reseter extends Component<ReseterData> {
     }
 
     componentCompleted() {
-        const component = getComponentInformation<ReseterData>();
+        const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents)
     }
 }
@@ -126,7 +130,9 @@ export class Reseter extends Component<ReseterData> {
 registerComponent(new Reseter());
 
 export class StartNode extends Component {
-    schemaComponentData: JSONSchema7 = {
+    description = "The StartNode component will activate itself on the game's start, and finish itself shortly.";
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -134,10 +140,10 @@ export class StartNode extends Component {
     };
     autoStart = true;
 
-    componentOutputTemplate = {};
+    outputTemplates = {};
 
     componentCompleted() {
-        const component = getComponentInformation();
+        const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents)
     }
 
@@ -153,13 +159,16 @@ export class StartNode extends Component {
 registerComponent(new StartNode());
 
 export class EndNode extends Component {
-    schemaComponentData: JSONSchema7 = {
+    description = "The EndNode will signal that the game has ended to the game.";
+    useNextComponents = false;
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false
     };
 
-    componentOutputTemplate = {};
+    outputTemplates = {};
 
     protected componentCleanUp(): void {
 

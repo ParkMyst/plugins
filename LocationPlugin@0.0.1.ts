@@ -5,18 +5,15 @@ import {
     createFeed,
     dispatchCompleted,
     dispatchNextComponentEvent,
-    getComponentInformation,
     isLocationUpdatedEvent,
     JSONSchema7,
     LocationUpdatedEvent,
     OutputTemplates,
-    PlayerPermission,
     registerComponent,
     removeFeed,
     subscribeToEvent,
     unsubscribeFromEvent,
-    updateFeed,
-    useState
+    updateFeed
 } from "./library/parkmyst-1";
 
 interface LocationData extends ComponentData {
@@ -27,7 +24,7 @@ interface LocationData extends ComponentData {
     sensitivity: number
 }
 
-interface LocationContext {
+interface LocationState {
     feedId: string,
     players: string[]
     playerLocations: {
@@ -61,9 +58,9 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number): numbe
     }
 }
 
-export class Location extends Component<LocationData> {
+export class Location extends Component<LocationData, LocationState> {
 
-    schemaComponentData: JSONSchema7 = {
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -106,7 +103,7 @@ export class Location extends Component<LocationData> {
         }
     };
 
-    componentOutputTemplate: OutputTemplates = {
+    outputTemplates: OutputTemplates = {
         locationHint: {
             example: {
                 longitude: 47.541246,
@@ -120,7 +117,7 @@ export class Location extends Component<LocationData> {
                     }
                 }
             },
-            display: `<div style="height: 500px">
+            template: `<div style="height: 500px">
 					<map latitude="{{latitude}}" longitude="{{longitude}}">
 						<marker latitude="{{latitude}}" 
 								longitude="{{longitude}}"
@@ -135,8 +132,7 @@ export class Location extends Component<LocationData> {
 						</marker>
 						{% endfor %}
 					</map>
-				</div>`,
-            permission: PlayerPermission.User
+				</div>`
         }
     };
 
@@ -146,11 +142,11 @@ export class Location extends Component<LocationData> {
     }
 
     componentStartEvent() {
-        const component = getComponentInformation<LocationData>();
-        const [, setContext] = useState<LocationContext>();
+        const component = this.getInformation();
+        const [, setContext] = this.useState();
 
         subscribeToEvent(BuiltInEvents.LocationUpdated)
-        const context: LocationContext = {
+        const context: LocationState = {
             feedId: createFeed("locationHint", {
                 latitude: component.data.coordinates.latitude,
                 longitude: component.data.coordinates.longitude,
@@ -162,8 +158,8 @@ export class Location extends Component<LocationData> {
     }
 
     handleLocationUpdated(event: LocationUpdatedEvent) {
-        const component = getComponentInformation<LocationData>();
-        const [ctx, setContext] = useState<LocationContext>();
+        const component = this.getInformation();
+        const [ctx, setContext] = this.useState();
 
         const username: string = event.sender.username;
         const playerLongitude: number = event.sender.longitude;
@@ -198,12 +194,12 @@ export class Location extends Component<LocationData> {
 
     componentCleanUp() {
         unsubscribeFromEvent(BuiltInEvents.LocationUpdated)
-        const [ctx,] = useState<LocationContext>();
+        const [ctx,] = this.useState();
         removeFeed(ctx.feedId);
     }
 
     componentCompleted() {
-        const component = getComponentInformation<LocationData>();
+        const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents)
     }
 

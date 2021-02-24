@@ -15,34 +15,33 @@ function isStationEvent(event: ComponentEvent): event is StationEvent {
         (!isPlayerSender(event.sender) || isPlayerController(event.sender) || isPlayerAdmin(event.sender));
 }
 
-export class StationComponent extends Component {
+export class StationComponent extends Component<unknown, StationState> {
+    description = "StationComponent gives you a control point, where a controller player has to manually signal that a team has completed the task."
 
-    schemaComponentData: JSONSchema7 = {
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
         "properties": {}
     };
 
-    componentOutputTemplate: OutputTemplates = {
+    outputTemplates: OutputTemplates = {
         stationUserWaiting: {
-            display: `
+            template: `
                     <div>
                         A folytatáshoz teljesítsd az állomás feladatát... Ha ez megtörtént kérd az állomás vezetőt hogy engedjen tovább.
                     </div>
                 `,
-            example: {},
-            permission: PlayerPermission.User
+            example: {}
         },
         stationController: {
-            display: `
+            template: `
                     <form>
-                        <label for="stationButton">Complete station</label>  
+                        <label for="stationButton">Nyomd meg ezt a gombot, ha a csapat teljesítette a feladatát!</label>  
                         <input id="stationButton" type="submit" inputtype="stationCompleted"/>
                     </form>
                 `,
-            example: {},
-            permission: PlayerPermission.Controller
+            example: {}
         }
     };
 
@@ -52,7 +51,7 @@ export class StationComponent extends Component {
     }
 
     componentStartEvent() {
-        const [, setState] = useState<StationState>();
+        const [, setState] = this.useState();
         setState({
             waitingFeedId: createFeed("stationUserWaiting",  {}),
             controlFeedId: createFeed("stationController", {}, PlayerPermission.Controller)
@@ -68,7 +67,7 @@ export class StationComponent extends Component {
     }
 
     componentCompleted() {
-        const information = this.getComponentInformation();
+        const information = this.getInformation();
         dispatchNextComponentEvent(information.nextComponents);
     }
 

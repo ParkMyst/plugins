@@ -1,0 +1,46 @@
+{
+  "$id": "http://parkmyst.github.io/plugins/schemas/gametemplate.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Game template",
+  "description": "A ParkMyst game template that can be loaded",
+  "type": "object",
+  "properties": {
+    "name": {
+      "$id": "#/properties/name",
+      "type": "string",
+      "title": "Name",
+      "description": "Name of the plugin.",
+      "pattern": "^[a-zA-Z]{1,20}$",
+      "examples": [
+        "TestPlugin"
+      ]
+    },
+    "description": {
+      "$id": "#/properties/description",
+      "type": "string",
+      "title": "Description",
+      "description": "Description of the plugin",
+      "default": "",
+      "maxLength": 300
+    },
+    "path": {
+      "$id": "#/properties/path",
+      "type": "string",
+      "title": "Path of template",
+      "description": "This contains the path to the game template.",
+      "pattern": "^\\./((?!library)[^\\n\"?:*<>|/\\\\ ]/?)+$",
+      "example": [
+        "./TestPlugin.ts"
+      ]
+    },
+    "dependencies": {
+      "$id": "#/properties/dependencies",
+      "type": "array",
+      "title": "Dependencies",
+      "description": "A list of components that are required for this game.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

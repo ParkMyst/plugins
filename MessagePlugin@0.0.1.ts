@@ -9,21 +9,26 @@ import {
     OutputTemplates,
     PlayerPermission,
     registerComponent,
-    removeFeed, subscribeToEvent, unsubscribeFromEvent, updateStatus,
-    useState
+    removeFeed,
+    subscribeToEvent,
+    unsubscribeFromEvent,
+    updateStatus
 } from "./library/parkmyst-1";
 
 interface HtmlMessageData extends ComponentData {
     message: string
 }
 
-interface FeedContext {
+interface MessageState {
     messageId: string
 }
 
-export class HtmlMessage extends Component<HtmlMessageData> {
+export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
 
-    schemaComponentData: JSONSchema7 = {
+    description = "HtmlMessage component allows you to show custom html content to the user.\n" +
+        "Will signal the next components and stays active.";
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -43,21 +48,20 @@ export class HtmlMessage extends Component<HtmlMessageData> {
     doCleanUpOnCompletion = false;
     defaultCleanUpEnabled = false;
 
-    componentOutputTemplate: OutputTemplates = {
+    outputTemplates: OutputTemplates = {
         message: {
             example: {
                 message: "Example message!"
             },
-            display: `<div>
+            template: `<div>
     <p>{{message}}</p>
-</div>`,
-            permission: PlayerPermission.User
+</div>`
         }
     };
 
     componentStartEvent() {
         const component = getComponentInformation<HtmlMessageData>();
-        const [, setCtx] = useState<FeedContext>();
+        const [, setCtx] = this.useState();
 
         const feedId = createFeed("message", {
             message: component.data.message
@@ -68,7 +72,7 @@ export class HtmlMessage extends Component<HtmlMessageData> {
     }
 
     componentCleanUp() {
-        const [ctx,] = useState<FeedContext>();
+        const [ctx,] = this.useState();
         removeFeed(ctx.messageId);
         updateStatus("idle");
         subscribeToEvent(BuiltInEvents.ComponentStart)
@@ -88,9 +92,12 @@ interface ImageMessageData extends ComponentData {
     alt: string
 }
 
-export class ImageMessage extends Component<ImageMessageData> {
+export class ImageMessage extends Component<ImageMessageData, MessageState> {
 
-    schemaComponentData: JSONSchema7 = {
+    description = "HtmlMessage component allows you to show image content to the user.\n" +
+        "Will signal the next components and stays active.";
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -118,22 +125,21 @@ export class ImageMessage extends Component<ImageMessageData> {
     doCleanUpOnCompletion = false;
     defaultCleanUpEnabled = false;
 
-    componentOutputTemplate: OutputTemplates = {
+    outputTemplates: OutputTemplates = {
         imageMessage: {
             example: {
                 url: "http://placehold.jp/50x50.png",
                 alt: "placeholder image 50x50"
             },
-            display: `<div>
+            template: `<div>
     <img style="width: 100%" src="{{url}}" alt="{{alt}}">
-</div>`,
-            permission: PlayerPermission.User
+</div>`
         }
     };
 
     componentStartEvent() {
-        const component = getComponentInformation<ImageMessageData>();
-        const [, setCtx] = useState<FeedContext>();
+        const component = this.getInformation();
+        const [, setCtx] = this.useState();
 
         const feedId = createFeed("imageMessage", {
             url: component.data.url,
@@ -145,7 +151,7 @@ export class ImageMessage extends Component<ImageMessageData> {
     }
 
     componentCleanUp() {
-        const [ctx,] = useState<FeedContext>();
+        const [ctx,] = this.useState();
         removeFeed(ctx.messageId);
         updateStatus("idle");
         subscribeToEvent(BuiltInEvents.ComponentStart)

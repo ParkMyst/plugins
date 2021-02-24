@@ -5,18 +5,15 @@ import {
     createFeed,
     dispatchCompleted,
     dispatchNextComponentEvent,
-    getComponentInformation,
     isLocationUpdatedEvent,
     JSONSchema7,
     LocationUpdatedEvent,
     OutputTemplates,
-    PlayerPermission,
     registerComponent,
     removeFeed,
     subscribeToEvent,
     unsubscribeFromEvent,
-    updateFeed,
-    useState
+    updateFeed
 } from "./library/parkmyst-1";
 
 interface LocationData extends ComponentData {
@@ -27,7 +24,7 @@ interface LocationData extends ComponentData {
     sensitivity: number
 }
 
-interface LocationContext {
+interface LocationState {
     feedId: string,
     players: string[]
     playerLocations: {
@@ -61,9 +58,13 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number): numbe
     }
 }
 
-export class LeafletLocation extends Component<LocationData> {
+export class LeafletLocation extends Component<LocationData, LocationState> {
 
-    schemaComponentData: JSONSchema7 = {
+    description = "LeafletLocation component provides you with a simple 'go there!' action for the player. " +
+        "You can specify the location with latitude and longitude, and you can also specify the sensitivity that is given is units of meter." +
+        "This component uses an external leaflet dependency, and therefore is experimental. This will succeed the Location Component";
+
+    schema: JSONSchema7 = {
         "$schema": "http://json-schema.org/draft-07/schema",
         "type": "object",
         "additionalProperties": false,
@@ -106,7 +107,7 @@ export class LeafletLocation extends Component<LocationData> {
         }
     };
 
-    componentOutputTemplate: OutputTemplates = {
+    outputTemplates: OutputTemplates = {
         leafletHint: {
             example: {
                 longitude: 47.541246,
@@ -120,7 +121,7 @@ export class LeafletLocation extends Component<LocationData> {
                     }
                 }
             },
-            display: `<div style="width: 90%; margin: 0 auto; height: 50vh">
+            template: `<div style="width: 90%; margin: 0 auto; height: 50vh">
     <div id="leaflet-map-{{id}}"></div>
 </div>
 <script>
@@ -176,8 +177,7 @@ export class LeafletLocation extends Component<LocationData> {
 	    mainMarker.bindPopup("célpont: {{latitude}}, {{longitude}}")
 	    return map;
     }
-</script>`,
-            permission: PlayerPermission.User
+</script>`
         }
     };
 
@@ -187,15 +187,15 @@ export class LeafletLocation extends Component<LocationData> {
     }
 
     componentStartEvent() {
-        const component = getComponentInformation<LocationData>();
-        const [, setContext] = useState<LocationContext>();
+        const information = this.getInformation();
+        const [, setContext] = this.useState();
 
         subscribeToEvent(BuiltInEvents.LocationUpdated)
-        const context: LocationContext = {
+        const context: LocationState = {
             feedId: createFeed("leafletHint", {
-                latitude: component.data.coordinates.latitude,
-                longitude: component.data.coordinates.longitude,
-                id: component.id,
+                latitude: information.data.coordinates.latitude,
+                longitude: information.data.coordinates.longitude,
+                id: information.id,
             }),
             players: [],
             playerLocations: {}
@@ -204,15 +204,15 @@ export class LeafletLocation extends Component<LocationData> {
     }
 
     handleLocationUpdated(event: LocationUpdatedEvent) {
-        const component = getComponentInformation<LocationData>();
-        const [ctx, setContext] = useState<LocationContext>();
+        const information = this.getInformation();
+        const [ctx, setContext] =  this.useState();
 
         const username: string = event.sender.username;
         const playerLongitude: number = event.sender.longitude;
         const playerLatitude: number = event.sender.latitude;
-        const sensitivity = component.data.sensitivity;
-        const targetLatitude = component.data.coordinates.latitude;
-        const targetLongitude = component.data.coordinates.longitude;
+        const sensitivity = information.data.sensitivity;
+        const targetLatitude = information.data.coordinates.latitude;
+        const targetLongitude = information.data.coordinates.longitude;
 
         const notInList = ctx.players.findIndex((player: string) => player === username) === -1;
         if (notInList) {
@@ -226,11 +226,11 @@ export class LeafletLocation extends Component<LocationData> {
         };
 
         updateFeed(ctx.feedId, {
-            latitude: component.data.coordinates.latitude,
-            longitude: component.data.coordinates.longitude,
+            latitude: information.data.coordinates.latitude,
+            longitude: information.data.coordinates.longitude,
             players: ctx.players,
             playerLocations: ctx.playerLocations,
-            id: component.id
+            id: information.id
         });
 
         setContext(ctx);
@@ -241,13 +241,13 @@ export class LeafletLocation extends Component<LocationData> {
 
     componentCleanUp() {
         unsubscribeFromEvent(BuiltInEvents.LocationUpdated)
-        const [ctx,] = useState<LocationContext>();
+        const [ctx,] = this.useState();
         removeFeed(ctx.feedId);
     }
 
     componentCompleted() {
-        const component = getComponentInformation<LocationData>();
-        dispatchNextComponentEvent(component.nextComponents)
+        const information = this.getInformation();
+        dispatchNextComponentEvent(information.nextComponents)
     }
 
 }

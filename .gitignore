@@ -1,2 +1,4 @@
 *.js
+*.gradle
+tsconfig.json
 library/
