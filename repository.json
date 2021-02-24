@@ -68,6 +68,13 @@
             "description": "This contains components for making an approval station",
             "library": "parkmyst-1.ts",
             "path": "./StationPlugin@0.0.1.ts"
+        },
+        {
+            "name": "MatrixPlugin",
+            "version": "0.0.1",
+            "description": "This is a proof of concept plugin for the theme system",
+            "library": "parkmyst-1.ts",
+            "path": "./MatrixPlugin@0.0.1.ts"
         }
     ]
 }
