@@ -59,7 +59,7 @@ export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
         }
     };
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         const component = getComponentInformation<HtmlMessageData>();
         const [, setCtx] = this.useState();
 
@@ -71,7 +71,7 @@ export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
         dispatchNextComponentEvent(component.nextComponents);
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         const [ctx,] = this.useState();
         removeFeed(ctx.messageId);
         updateStatus("idle");
@@ -80,7 +80,7 @@ export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
         unsubscribeFromEvent(BuiltInEvents.ComponentEnd);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
 
     }
 }
@@ -137,7 +137,7 @@ export class ImageMessage extends Component<ImageMessageData, MessageState> {
         }
     };
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         const component = this.getInformation();
         const [, setCtx] = this.useState();
 
@@ -150,7 +150,7 @@ export class ImageMessage extends Component<ImageMessageData, MessageState> {
         dispatchNextComponentEvent(component.nextComponents);
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         const [ctx,] = this.useState();
         removeFeed(ctx.messageId);
         updateStatus("idle");
@@ -159,7 +159,7 @@ export class ImageMessage extends Component<ImageMessageData, MessageState> {
         unsubscribeFromEvent(BuiltInEvents.ComponentEnd);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
 
     }
 

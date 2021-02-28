@@ -50,7 +50,7 @@ export class StationComponent extends Component<unknown, StationState> {
         this.registerSafeEventListeners<StationEvent>("stationCompleted", this.handleStationEvent, isStationEvent);
     }
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         const [, setState] = this.useState();
         setState({
             waitingFeedId: createFeed("stationUserWaiting",  {}),
@@ -59,19 +59,19 @@ export class StationComponent extends Component<unknown, StationState> {
         subscribeToEvent("stationCompleted");
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         const [state] = useState<StationState>();
         removeFeed(state.controlFeedId);
         removeFeed(state.waitingFeedId);
         unsubscribeFromEvent("stationCompleted");
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const information = this.getInformation();
         dispatchNextComponentEvent(information.nextComponents);
     }
 
-    handleStationEvent() {
+    handleStationEvent = () => {
         dispatchCompleted();
     }
 

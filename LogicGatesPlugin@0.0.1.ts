@@ -82,24 +82,24 @@ export class Threshold extends Component<ThresholdData, ThresholdState> {
 
     outputTemplates = {};
 
-    gameStartEvent() {
+    gameStartEvent= () => {
         this.componentCleanUp();
         updateStatus("active");
         subscribeToEvent("componentReset")
     }
 
-    componentCleanUp() {
+    componentCleanUp= () => {
         const [, setContext] = this.useState();
         setContext({
             activatedAmount: 0
         });
     }
 
-    componentCompleted() {
+    componentCompleted= () => {
 
     }
 
-    componentStartEvent() {
+    componentStartEvent= () => {
         const component = this.getInformation();
         const [context, setContext] = this.useState();
 

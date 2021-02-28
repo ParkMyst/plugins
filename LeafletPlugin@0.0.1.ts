@@ -121,62 +121,85 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
                     }
                 }
             },
-            template: `<div style="width: 90%; margin: 0 auto; height: 50vh">
+            template: `<div id="leaflet-plugin-container-{{id}}" style="width: 90%; margin: 0 auto; height: 50vh">
     <div id="leaflet-map-{{id}}"></div>
 </div>
 <script>
-    if (maps === undefined) {
-	    var maps = {}    	
-    }
-    
-    if (maps["leaflet-map-{{id}}"] === undefined) {
-	    maps["leaflet-map-{{id}}"] = {
-	    	markers: [],
-	    	map: mapSetup{{id}}("leaflet-map-{{id}}"),
-        };
-    }
+var leafletPluginMapId = "{{id}}";
 
-    updateMarkers{{id}}();
+if (leafletPluginMarkers === undefined) {
+    var leafletPluginMarkers = {};
+}
 
-    function updateMarkers{{id}}() {
-    	var map = maps["leaflet-map-{{id}}"].map;
-    	var markers = maps["leaflet-map-{{id}}"].markers;
-    	markers.forEach(marker => map.removeLayer(marker));
-	    maps["leaflet-map-{{id}}"].markers = [];
-    	
-	    var marker;
-	    var icon;
-	    {% for username in players %}
-	    icon = L.icon({
-		    iconUrl: "{{playerLocations[username].url}}",
-		    iconSize: [25, 25]
-	    });
-	    marker = L.marker([{{playerLocations[username].latitude}}, {{playerLocations[username].longitude}}], {
-		    icon: icon
-	    }).addTo(map);
-	    marker.bindPopup("{{username}}");
-	    maps["leaflet-map-{{id}}"].markers.push(marker);
-	    {% endfor %}
+if (leafletPluginMaps === undefined) {
+    var leafletPluginMaps = {};
+}
+
+var map = createMapSetup(leafletPluginMapId)("leaflet-plugin-map-" + leafletPluginMapId);
+leafletPluginMaps[leafletPluginMapId] = map;
+
+function createMapSetup(mapId) {
+    return function mapSetup(mapName) {
+        var container = L.DomUtil.get(mapName);
+
+        var map;
+        if (container != null && leafletPluginMaps[mapId] != null && leafletPluginMaps != undefined) {
+            console.log("Loading map from cache");
+            map = leafletPluginMaps[mapId];
+        } else {
+            console.log("Creating new map");
+            document.getElementById('leaflet-plugin-container-' + mapId).innerHTML = "<div id=" + mapName + "></div>";
+            map = L.map(mapName);
+
+            var mapLatitude = parseFloat("{{latitude}}");
+            var mapLongitude = parseFloat("{{longitude}}");
+
+            map.setView([mapLatitude, mapLongitude], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            var mainIcon = L.icon({
+                iconUrl: "https://tcbmag.com/wp-content/uploads/2020/03/7fe12969-5641-4ce0-9395-e325cee0e830.jpg",
+                iconSize: [50, 50],
+            });
+            var mainMarker = L.marker([mapLatitude, mapLongitude], { icon: mainIcon }).addTo(map);
+            mainMarker.bindPopup("Célpont: {{latitude}}, {{longitude}}")
+        }
+
+        if (leafletPluginMarkers[mapId] !== undefined) {
+            leafletPluginMarkers[mapId].forEach(marker => map.removeLayer(marker));
+            leafletPluginMarkers[mapId] = [];
+        }
+
+        updateMarkers(mapId, map);
+
+        return map;
     }
-    
-    function mapSetup{{id}}(mapName) {
-	    var map = L.map('leaflet-map-{{id}}');
-	    var mapLatitude = parseInt("{{latitude}}");
-	    var mapLongitude = parseInt("{{longitude}}");
+}
 
-	    map.setView([mapLatitude, mapLongitude], 14);
-	    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		    attribution: '&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors'
-	    }).addTo(map);
+function updateMarkers(mapId, map) {
+    if (leafletPluginMarkers[mapId] === undefined)
+        leafletPluginMarkers[mapId] = [];
 
-	    var mainIcon = L.icon({
-		    iconUrl: "https://tcbmag.com/wp-content/uploads/2020/03/7fe12969-5641-4ce0-9395-e325cee0e830.jpg",
-		    iconSize: [50, 50],
-	    });
-	    var mainMarker = L.marker([mapLatitude, mapLongitude], {icon: mainIcon}).addTo(map);
-	    mainMarker.bindPopup("célpont: {{latitude}}, {{longitude}}")
-	    return map;
-    }
+    var marker;
+    var icon;
+    var latitude;
+    var longitude;
+    {% for username in players %}
+    icon = L.icon({
+        iconUrl: "{{playerLocations[username].url}}",
+        iconSize: [25, 25]
+    });
+    latitude = parseFloat("{{playerLocations[username].latitude}}");
+    longitude = parseFloat("{{playerLocations[username].longitude}}");
+    marker = L.marker([latitude, longitude], {
+        icon: icon
+    }).addTo(map);
+    marker.bindPopup("{{username}}");
+    leafletPluginMarkers[mapId].push(marker);
+    {% endfor %}
+}
 </script>`
         }
     };
@@ -186,7 +209,7 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
         this.registerSafeEventListeners(BuiltInEvents.LocationUpdated, this.handleLocationUpdated, isLocationUpdatedEvent);
     }
 
-    componentStartEvent() {
+    componentStartEvent  = () => {
         const information = this.getInformation();
         const [, setContext] = this.useState();
 
@@ -203,7 +226,7 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
         setContext(context);
     }
 
-    handleLocationUpdated(event: LocationUpdatedEvent) {
+    handleLocationUpdated = (event: LocationUpdatedEvent) => {
         const information = this.getInformation();
         const [ctx, setContext] =  this.useState();
 
@@ -239,13 +262,13 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
             dispatchCompleted();
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         unsubscribeFromEvent(BuiltInEvents.LocationUpdated)
         const [ctx,] = this.useState();
         removeFeed(ctx.feedId);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const information = this.getInformation();
         dispatchNextComponentEvent(information.nextComponents)
     }

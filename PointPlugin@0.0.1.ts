@@ -97,7 +97,7 @@ export class PointInitializer extends Component<PointInitializerData> {
         this.registerSafeEventListeners("pointEvent", this.handlePointEvent, isPointEvent);
     }
 
-    componentStartEvent(): void {
+    componentStartEvent = (): void => {
         const component = this.getInformation();
         const [context, setContext] = useSharedState<GlobalPointState>();
         if (context.points === undefined)
@@ -109,14 +109,14 @@ export class PointInitializer extends Component<PointInitializerData> {
         subscribeToEvent("pointEvent");
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         unsubscribeFromEvent("pointEvent");
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
     }
 
-    handlePointEvent(event: PointEvent) {
+    handlePointEvent = (event: PointEvent) => {
         const component = this.getInformation();
         if (event.data.counterId === component.data.id || event.data.counterId.length === 0) {
             const [context, setContext] = useSharedState<GlobalPointState>();
@@ -185,7 +185,7 @@ export class PointChanger extends Component<PointChangerData> {
 
     outputTemplates = {};
 
-    componentStartEvent(): void {
+    componentStartEvent = (): void => {
         const component = this.getInformation();
         dispatchComponentEvent({
             type: "pointEvent",
@@ -198,12 +198,12 @@ export class PointChanger extends Component<PointChangerData> {
         dispatchCompleted();
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents);
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
 
     }
 
@@ -256,7 +256,7 @@ export class PointResult extends Component<PointResultData, PointResultState> {
     doCleanUpOnCompletion = false;
     defaultCleanUpEnabled = false;
 
-    componentStartEvent(): void {
+    componentStartEvent = (): void => {
         const component = this.getInformation()
         const [context,] = useSharedState<GlobalPointState>();
         const points = context.points[component.data.counterId]?.point ?? -1;
@@ -268,7 +268,7 @@ export class PointResult extends Component<PointResultData, PointResultState> {
         dispatchCompleted();
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         const [ctx,] = this.useState();
         removeFeed(ctx.messageId);
         updateStatus("idle");
@@ -277,7 +277,7 @@ export class PointResult extends Component<PointResultData, PointResultState> {
         unsubscribeFromEvent(BuiltInEvents.ComponentEnd);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents);
     }

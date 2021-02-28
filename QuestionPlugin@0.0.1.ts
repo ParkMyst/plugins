@@ -155,7 +155,7 @@ export class SimpleQuestion extends Component<QuestionData, SimpleQuestionState>
         this.registerSafeEventListeners("simpleAnswer", this.handleSimpleAnswer, isAnswerEvent);
     }
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         subscribeToEvent("simpleAnswer");
         const component = this.getInformation();
         const [, setContext] = this.useState();
@@ -169,13 +169,13 @@ export class SimpleQuestion extends Component<QuestionData, SimpleQuestionState>
         setContext(ctx);
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         const [ctx,] = this.useState();
         unsubscribeFromEvent("simpleAnswer");
         removeFeed(ctx.feedId);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const data = this.getInformation();
         dispatchNextComponentEvent(data.nextComponents);
     }
@@ -293,7 +293,7 @@ export class CommentQuestion extends Component<QuestionData, CommentQuestionStat
         this.registerSafeEventListeners("simpleAnswer", this.handleAnswer, isAnswerEvent);
     }
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         subscribeToEvent("simpleAnswer")
         const component = this.getInformation();
         const [, setContext] = this.useState();
@@ -309,13 +309,13 @@ export class CommentQuestion extends Component<QuestionData, CommentQuestionStat
         setContext(ctx);
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         unsubscribeFromEvent("simpleAnswer");
         const [ctx,] = this.useState();
         removeFeed(ctx.feedId);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const data = this.getInformation();
         dispatchNextComponentEvent(data.nextComponents);
     }

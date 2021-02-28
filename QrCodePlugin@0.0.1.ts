@@ -44,20 +44,20 @@ export class QrCode extends Component<QrCodeData> {
         this.registerSafeEventListeners(BuiltInEvents.QrCode, this.handleQrCode, isQRCodeEvent);
     }
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         subscribeToEvent(BuiltInEvents.QrCode);
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         unsubscribeFromEvent(BuiltInEvents.QrCode);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents);
     }
 
-    handleQrCode(event: QRCodeEvent) {
+    handleQrCode = (event: QRCodeEvent) => {
         const component = this.getInformation();
         if (component.data.code === event.data.code)
             dispatchCompleted();

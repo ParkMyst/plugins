@@ -141,7 +141,7 @@ export class Location extends Component<LocationData, LocationState> {
         this.registerSafeEventListeners(BuiltInEvents.LocationUpdated, this.handleLocationUpdated, isLocationUpdatedEvent);
     }
 
-    componentStartEvent() {
+    componentStartEvent = () => {
         const component = this.getInformation();
         const [, setContext] = this.useState();
 
@@ -157,7 +157,7 @@ export class Location extends Component<LocationData, LocationState> {
         setContext(context);
     }
 
-    handleLocationUpdated(event: LocationUpdatedEvent) {
+    handleLocationUpdated = (event: LocationUpdatedEvent) => {
         const component = this.getInformation();
         const [ctx, setContext] = this.useState();
 
@@ -192,13 +192,13 @@ export class Location extends Component<LocationData, LocationState> {
             dispatchCompleted();
     }
 
-    componentCleanUp() {
+    componentCleanUp = () => {
         unsubscribeFromEvent(BuiltInEvents.LocationUpdated)
         const [ctx,] = this.useState();
         removeFeed(ctx.feedId);
     }
 
-    componentCompleted() {
+    componentCompleted = () => {
         const component = this.getInformation();
         dispatchNextComponentEvent(component.nextComponents)
     }
