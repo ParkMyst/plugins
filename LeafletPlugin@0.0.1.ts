@@ -20,8 +20,13 @@ interface LocationData extends ComponentData {
     coordinates: {
         latitude: number,
         longitude: number
-    }
-    sensitivity: number
+    },
+    sensitivity: number,
+    showMarker: boolean,
+    markerPictureUrl: string;
+    markerPopupText: string;
+    showUsers: boolean,
+    containerClass: string,
 }
 
 interface LocationState {
@@ -70,7 +75,10 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
         "additionalProperties": false,
         "required": [
             "coordinates",
-            "sensitivity"
+            "sensitivity",
+            "showMarker",
+            "markerPictureUrl",
+            "showUsers"
         ],
         "definitions": {
             "location": {
@@ -103,6 +111,36 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
                 "title": "Proximity to location (km)",
                 "default": 0.1,
                 "minimum": 0.0
+            },
+            "showMarker": {
+                "$id": "#/properties/showMarker",
+                "type": "boolean",
+                "title": "Show marker",
+                "default": true
+            },
+            "markerPictureUrl": {
+                "$id": "#/properties/markerPictureUrl",
+                "type": "string",
+                "title": "Marker picture url",
+                "default": "http://assets.stickpng.com/images/58568b014f6ae202fedf2717.png"
+            },
+            "markerPopupText": {
+                "$id": "#/properties/markerPopupText",
+                "type": "string",
+                "title": "Marker popup text",
+                "default": "This is your goal!"
+            },
+            "showUsers": {
+                "$id": "#/properties/showUsers",
+                "type": "boolean",
+                "title": "Show users",
+                "default": true
+            },
+            "containerClass": {
+                "$id": "#/properties/containerClass",
+                "type": "string",
+                "title": "Map container class name",
+                "default": "leaflet-map-container"
             }
         }
     };
@@ -112,7 +150,12 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
             example: {
                 longitude: 47.541246,
                 latitude: 19.243312,
+                showMarker: true,
+                markerPictureUrl: "http://assets.stickpng.com/images/58568b014f6ae202fedf2717.png",
+                showUsers: true,
+                markerPopupText: "Your goal is here!",
                 players: ["test"],
+                containerClass: "leaflet-map-container",
                 playerLocations: {
                     "test": {
                         longitude: 47.541497,
@@ -121,8 +164,8 @@ export class LeafletLocation extends Component<LocationData, LocationState> {
                     }
                 }
             },
-            template: `<div id="leaflet-plugin-container-{{id}}" style="width: 90%; margin: 0 auto; height: 50vh">
-    <div id="leaflet-map-{{id}}"></div>
+            template: `<div id="leaflet-plugin-container-{{id}}" class="{{containerClass}}" style="width: 90%; margin: 0 auto; height: 50vh">
+    
 </div>
 <script>
 var leafletPluginMapId = "{{id}}";
@@ -144,10 +187,8 @@ function createMapSetup(mapId) {
 
         var map;
         if (container != null && leafletPluginMaps[mapId] != null && leafletPluginMaps != undefined) {
-            console.log("Loading map from cache");
             map = leafletPluginMaps[mapId];
         } else {
-            console.log("Creating new map");
             document.getElementById('leaflet-plugin-container-' + mapId).innerHTML = "<div id=" + mapName + "></div>";
             map = L.map(mapName);
 
@@ -159,12 +200,17 @@ function createMapSetup(mapId) {
                 attribution: '&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            var mainIcon = L.icon({
-                iconUrl: "https://tcbmag.com/wp-content/uploads/2020/03/7fe12969-5641-4ce0-9395-e325cee0e830.jpg",
-                iconSize: [50, 50],
-            });
-            var mainMarker = L.marker([mapLatitude, mapLongitude], { icon: mainIcon }).addTo(map);
-            mainMarker.bindPopup("Célpont: {{latitude}}, {{longitude}}")
+            if ("{{showMarker}}" === "true") {
+                var mainIcon = L.icon({
+                    iconUrl: "{{markerPictureUrl}}",
+                    iconSize: [50, 50],
+                });
+                var mainMarker = L.marker([mapLatitude, mapLongitude], { icon: mainIcon }).addTo(map);
+                var popupText = "{{markerPopupText}}";
+                if (popupText.length !== 0)
+                    mainMarker.bindPopup(popupText)
+            }
+
         }
 
         if (leafletPluginMarkers[mapId] !== undefined) {
@@ -172,8 +218,9 @@ function createMapSetup(mapId) {
             leafletPluginMarkers[mapId] = [];
         }
 
-        updateMarkers(mapId, map);
-
+        if ("{{showUsers}}" === "true") {
+            updateMarkers(mapId, map);
+        }
         return map;
     }
 }
@@ -218,6 +265,11 @@ function updateMarkers(mapId, map) {
             feedId: createFeed("leafletHint", {
                 latitude: information.data.coordinates.latitude,
                 longitude: information.data.coordinates.longitude,
+                showMarker: information.data.showMarker,
+                markerPictureUrl: information.data.markerPictureUrl,
+                markerPopupText: information.data.markerPopupText,
+                showUsers: information.data.showUsers,
+                containerClass: information.data.containerClass,
                 id: information.id,
             }),
             players: [],
@@ -251,6 +303,11 @@ function updateMarkers(mapId, map) {
         updateFeed(ctx.feedId, {
             latitude: information.data.coordinates.latitude,
             longitude: information.data.coordinates.longitude,
+            showMarker: information.data.showMarker,
+            markerPictureUrl: information.data.markerPictureUrl,
+            markerPopupText: information.data.markerPopupText,
+            showUsers: information.data.showUsers,
+            containerClass: information.data.containerClass,
             players: ctx.players,
             playerLocations: ctx.playerLocations,
             id: information.id

@@ -23,6 +23,68 @@ interface MessageState {
     messageId: string
 }
 
+export class SimpleMessage extends Component<HtmlMessageData, MessageState> {
+
+    description = "SimpleMessage component allows you to show basic text message to the user.\n" +
+        "Will signal the next components and stays active.";
+
+    schema: JSONSchema7 = {
+        "$schema": "http://json-schema.org/draft-07/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+            "message"
+        ],
+        "properties": {
+            "message": {
+                "$id": "#/properties/message",
+                "type": "string",
+                "title": "Message",
+                "default": "Default message"
+            }
+        }
+    };
+
+    doCleanUpOnCompletion = false;
+    defaultCleanUpEnabled = false;
+
+    outputTemplates: OutputTemplates = {
+        simpleMessage: {
+            example: {
+                message: "Example message!"
+            },
+            template: `<p>{{message}}</p>`
+        }
+    };
+
+    componentStartEvent = () => {
+        const component = getComponentInformation<HtmlMessageData>();
+        const [, setCtx] = this.useState();
+
+        const feedId = createFeed("simpleMessage", {
+            message: component.data.message
+        });
+        setCtx({ messageId: feedId });
+
+        dispatchNextComponentEvent(component.nextComponents);
+    }
+
+    componentCleanUp = () => {
+        const [ctx,] = this.useState();
+        removeFeed(ctx.messageId);
+        updateStatus("idle");
+        subscribeToEvent(BuiltInEvents.ComponentStart)
+        unsubscribeFromEvent(BuiltInEvents.ComponentReset);
+        unsubscribeFromEvent(BuiltInEvents.ComponentEnd);
+    }
+
+    componentCompleted = () => {
+
+    }
+}
+
+registerComponent(new SimpleMessage());
+
 export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
 
     description = "HtmlMessage component allows you to show custom html content to the user.\n" +
@@ -49,13 +111,11 @@ export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
     defaultCleanUpEnabled = false;
 
     outputTemplates: OutputTemplates = {
-        message: {
+        htmlMessage: {
             example: {
-                message: "Example message!"
+                message: "<p>Example message!</p>"
             },
-            template: `<div>
-    <p>{{message}}</p>
-</div>`
+            template: `{{message}}`
         }
     };
 
@@ -63,7 +123,7 @@ export class HtmlMessage extends Component<HtmlMessageData, MessageState> {
         const component = getComponentInformation<HtmlMessageData>();
         const [, setCtx] = this.useState();
 
-        const feedId = createFeed("message", {
+        const feedId = createFeed("htmlMessage", {
             message: component.data.message
         });
         setCtx({ messageId: feedId });
